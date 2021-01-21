@@ -7,6 +7,7 @@ defmodule Naive.Trader do
   alias Streamer.Binance.TradeEvent
 
   @filter_type "PRICE_FILTER"
+  @binance_client Application.get_env(:naive, :binance_client)
 
   defmodule State do
     @enforce_keys [:symbol, :profit_interval, :tick_size]
@@ -29,7 +30,7 @@ defmodule Naive.Trader do
 
     Phoenix.PubSub.subscribe(
       Streamer.PubSub,
-      "trade_events:#{symbol}"
+      "trade_events:#{args.symbol}"
     )
 
     {:ok,
@@ -49,7 +50,7 @@ defmodule Naive.Trader do
     quantity = 100
 
     {:ok, %Binance.OrderResponse{} = order} =
-      Binance.order_limit_buy(
+      @binance_client.order_limit_buy(
         symbol,
         quantity,
         price,
@@ -82,7 +83,7 @@ defmodule Naive.Trader do
     Logger.info("Buy order filled, placing sell order (#{symbol}@#{sell_price})")
 
     {:ok, %Binance.OrderResponse{} = order} =
-      Binance.order_limit_sell(
+      @binance_client.order_limit_sell(
         symbol,
         quantity,
         sell_price,
@@ -106,12 +107,12 @@ defmodule Naive.Trader do
     {:stop, :normal, state}
   end
 
-  def handle_info(%TradeEvent{}, state) do
+  def handle_info(%TradeEvent{} = event, state) do
     {:noreply, state}
   end
 
   defp fetch_tick_size(symbol) do
-    Binance.get_exchange_info()
+    @binance_client.get_exchange_info()
     |> elem(1)
     |> Map.get(:symbols)
     |> Enum.find(&(&1["symbol"] == String.upcase(symbol)))
@@ -125,14 +126,16 @@ defmodule Naive.Trader do
          profit_interval,
          tick_size
        ) do
-    fee = D.cast("1.001")
-    original_price = buy_price |> D.cast() |> D.mult(fee)
-    tick = D.cast(tick_size)
+    fee = D.from_float(1.001)
+    original_price = buy_price |> D.new() |> D.mult(fee)
+    tick = D.new(tick_size)
+
+    profit_interval_decimal = D.from_float(profit_interval)
 
     new_target_price =
       D.mult(
         original_price,
-        D.add("1.0", D.cast(profit_interval))
+        D.add("1.0", profit_interval_decimal)
       )
 
     gross_target_price =
