@@ -1,7 +1,10 @@
 defmodule Naive.Trader do
   use GenServer
 
+  require Logger
+
   alias Decimal, as: D
+  alias Streamer.Binance.TradeEvent
 
   @filter_type "PRICE_FILTER"
 
@@ -33,15 +36,11 @@ defmodule Naive.Trader do
   end
 
   def handle_cast(
-        {:event,
-         %Streamer.Binance.TradeEvent{
-           price: price
-         }},
-        %State{
-          symbol: symbol,
-          buy_order: nil
-        } = state
+        %TradeEvent{price: price},
+        %State{symbol: symbol, buy_order: nil} = state
       ) do
+    Logger.info("Placing buy order (#{symbol}@#{price})")
+
     quantity = 100
 
     {:ok, %Binance.OrderResponse{} = order} =
@@ -56,11 +55,7 @@ defmodule Naive.Trader do
   end
 
   def handle_cast(
-        {:event,
-         %Streamer.Binance.TradeEvent{
-           buyer_order_id: order_id,
-           quantity: quantity
-         }},
+        %TradeEvent{buyer_order_id: order_id, quantity: quantity},
         %State{
           symbol: symbol,
           buy_order: %Binance.OrderResponse{
@@ -79,6 +74,8 @@ defmodule Naive.Trader do
         tick_size
       )
 
+    Logger.info("Buy order filled, placing sell order (#{symbol}@#{sell_price})")
+
     {:ok, %Binance.OrderResponse{} = order} =
       Binance.order_limit_sell(
         symbol,
@@ -91,11 +88,7 @@ defmodule Naive.Trader do
   end
 
   def handle_cast(
-        {:event,
-         %Streamer.Binance.TradeEvent{
-           seller_order_id: order_id,
-           quantity: quantity
-         }},
+        %TradeEvent{seller_order_id: order_id, quantity: quantity},
         %State{
           sell_order: %Binance.OrderResponse{
             order_id: order_id,
@@ -103,12 +96,12 @@ defmodule Naive.Trader do
           }
         } = state
       ) do
-    Process.exit(self(), :finished)
+    Logger.info("Trade finished, trader will now exit")
 
-    {:noreply, state}
+    {:stop, :normal, state}
   end
 
-  def handle_cast({:event, _}, state) do
+  def handle_cast(%TradeEvent{}, state) do
     {:noreply, state}
   end
 

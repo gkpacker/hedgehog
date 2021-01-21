@@ -1,5 +1,7 @@
 defmodule Naive do
-  def send_event(%Streamer.Binance.TradeEvent{} = event) do
-    GenServer.cast(:trader, {:event, event})
+  alias Streamer.Binance.TradeEvent
+
+  def send_event(%TradeEvent{} = event) do
+    GenServer.cast(:trader, event)
   end
 end
