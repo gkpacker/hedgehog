@@ -18,6 +18,7 @@ defmodule Naive.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
+      application: [:binance, :phoenix_pubsub],
       extra_applications: [:logger],
       # applications: [:binance],
       mod: {Naive.Application, []}
@@ -27,6 +28,7 @@ defmodule Naive.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:phoenix_pubsub, "~> 2.0"},
       {:binance, "~> 0.7.1"},
       {:decimal, "~> 1.0"},
       {:streamer, in_umbrella: true}

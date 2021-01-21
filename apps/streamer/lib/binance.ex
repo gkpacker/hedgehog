@@ -39,6 +39,12 @@ defmodule Streamer.Binance do
       buyer_market_maker: event["m"]
     }
 
+    Phoenix.PubSub.broadcast(
+      Streamer.PubSub,
+      "trade_events:#{trade_event.symbol}",
+      trade_event
+    )
+
     Logger.debug(
       "Trade event received " <>
         "#{trade_event.symbol}@#{trade_event.price}"
