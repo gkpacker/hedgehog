@@ -1,12 +1,11 @@
 defmodule Naive.Trader do
-  use GenServer
+  use GenServer, restart: :temporary
 
   require Logger
 
   alias Decimal, as: D
   alias Streamer.Binance.TradeEvent
 
-  @filter_type "PRICE_FILTER"
   @binance_client Application.get_env(:naive, :binance_client)
 
   defmodule State do
@@ -21,24 +20,21 @@ defmodule Naive.Trader do
     ]
   end
 
-  def start_link(%{} = args) do
-    GenServer.start_link(__MODULE__, args, name: :trader)
+  def start_link(%State{} = state) do
+    GenServer.start_link(__MODULE__, state)
   end
 
-  def init(%{} = args) do
-    tick_size = fetch_tick_size(args.symbol)
+  def init(%State{symbol: symbol} = state) do
+    symbol = String.upcase(symbol)
+
+    Logger.info("Initializing new trader for symbol(#{symbol})")
 
     Phoenix.PubSub.subscribe(
       Streamer.PubSub,
-      "trade_events:#{args.symbol}"
+      "trade_events:#{symbol}"
     )
 
-    {:ok,
-     %State{
-       symbol: args.symbol,
-       profit_interval: args.profit_interval,
-       tick_size: tick_size
-     }}
+    {:ok, state}
   end
 
   def handle_info(
@@ -57,7 +53,11 @@ defmodule Naive.Trader do
         "GTC"
       )
 
-    {:noreply, %{state | buy_order: order}}
+    new_state = %{state | buy_order: order}
+
+    Naive.Leader.notify(:trader_state_updated, new_state)
+
+    {:noreply, new_state}
   end
 
   def handle_info(
@@ -90,7 +90,11 @@ defmodule Naive.Trader do
         "GTC"
       )
 
-    {:noreply, %{state | sell_order: order}}
+    new_state = %{state | sell_order: order}
+
+    Naive.Leader.notify(:trader_state_updated, new_state)
+
+    {:noreply, new_state}
   end
 
   def handle_info(
@@ -109,16 +113,6 @@ defmodule Naive.Trader do
 
   def handle_info(%TradeEvent{} = event, state) do
     {:noreply, state}
-  end
-
-  defp fetch_tick_size(symbol) do
-    @binance_client.get_exchange_info()
-    |> elem(1)
-    |> Map.get(:symbols)
-    |> Enum.find(&(&1["symbol"] == String.upcase(symbol)))
-    |> Map.get("filters")
-    |> Enum.find(&(&1["filterType"] == @filter_type))
-    |> Map.get("tickSize")
   end
 
   defp calculate_sell_price(
