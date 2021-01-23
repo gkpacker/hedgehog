@@ -107,7 +107,7 @@ defmodule BinanceMock do
       ) do
     order_book = Map.get(order_books, :"#{symbol}", %OrderBook{})
 
-    result =
+    order =
       (order_book.buy_side ++
          order_book.sell_side ++
          order_book.historical)
@@ -117,7 +117,7 @@ defmodule BinanceMock do
             &1.order_id == order_id)
       )
 
-    {:reply, {:ok, result}, state}
+    {:reply, {:ok, order}, state}
   end
 
   def handle_info(
@@ -179,7 +179,7 @@ defmodule BinanceMock do
   end
 
   def broadcast_trade_event(%Streamer.Binance.TradeEvent{} = trade_event) do
-    symbol = String.upcase(trade_event.symbol)
+    symbol = String.downcase(trade_event.symbol)
 
     Phoenix.PubSub.broadcast(
       Streamer.PubSub,

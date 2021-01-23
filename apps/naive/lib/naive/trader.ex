@@ -41,7 +41,7 @@ defmodule Naive.Trader do
   end
 
   def init(%State{symbol: symbol} = state) do
-    symbol = String.upcase(symbol)
+    symbol = String.downcase(symbol)
 
     Logger.info("Initializing new trader for symbol(#{symbol})")
 
@@ -53,7 +53,6 @@ defmodule Naive.Trader do
     {:ok, state}
   end
 
-  @doc "Places a buy order"
   def handle_info(
         %TradeEvent{price: price},
         %State{
@@ -98,11 +97,11 @@ defmodule Naive.Trader do
   end
 
   def handle_info(
-        %TradeEvent{buyer_order_id: order_id},
+        %TradeEvent{},
         %State{
-          symbol: symbol,
+          symbol: _symbol,
           buy_order: %Binance.OrderResponse{
-            order_id: order_id,
+            order_id: _order_id,
             status: "FILLED"
           }
         } = state
@@ -110,7 +109,6 @@ defmodule Naive.Trader do
     {:no_reply, state}
   end
 
-  @doc "Places a sell order"
   def handle_info(
         %TradeEvent{buyer_order_id: order_id},
         %State{
@@ -168,7 +166,7 @@ defmodule Naive.Trader do
   end
 
   def handle_info(
-        %TradeEvent{seller_order_id: order_id, quantity: quantity},
+        %TradeEvent{seller_order_id: order_id},
         %State{
           id: id,
           symbol: symbol,
