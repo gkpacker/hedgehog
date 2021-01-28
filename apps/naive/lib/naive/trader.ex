@@ -89,6 +89,8 @@ defmodule Naive.Trader do
         "GTC"
       )
 
+    :ok = broadcast_order(order)
+
     new_state = %{state | buy_order: order}
 
     Naive.Leader.notify(:trader_state_updated, new_state)
@@ -132,6 +134,8 @@ defmodule Naive.Trader do
         order_id
       )
 
+    :ok = broadcast_order(current_buy_order)
+
     buy_order = %{buy_order | status: current_buy_order.status}
 
     {:ok, new_state} =
@@ -154,6 +158,8 @@ defmodule Naive.Trader do
             sell_price,
             "GTC"
           )
+
+        :ok = broadcast_order(new_sell_order)
 
         {:ok, %{state | buy_order: buy_order, sell_order: new_sell_order}}
       else
@@ -183,6 +189,8 @@ defmodule Naive.Trader do
         timestamp,
         order_id
       )
+
+    :ok = broadcast_order(current_sell_order)
 
     sell_order = %{sell_order | status: current_sell_order.status}
 
@@ -298,5 +306,42 @@ defmodule Naive.Trader do
 
   defp float_to_decimal(float) do
     D.from_float(float)
+  end
+
+  defp broadcast_order(%Binance.OrderResponse{} = response) do
+    response
+    |> convert_to_order()
+    |> broadcast_order()
+  end
+
+  defp broadcast_order(%Binance.Order{} = order) do
+    symbol = String.downcase(order.symbol)
+
+    Phoenix.PubSub.broadcast(
+      Streamer.PubSub,
+      "orders:#{symbol}",
+      order
+    )
+  end
+
+  defp convert_to_order(%Binance.OrderResponse{} = response) do
+    %Binance.Order{
+      symbol: response.symbol,
+      order_id: response.order_id,
+      client_order_id: response.client_order_id,
+      price: response.price,
+      orig_qty: response.orig_qty,
+      executed_qty: response.executed_qty,
+      cummulative_quote_qty: "0.00000000",
+      status: response.status,
+      time_in_force: response.time_in_force,
+      type: response.type,
+      side: response.side,
+      stop_price: "0.00000000",
+      iceberg_qty: "0.00000000",
+      time: response.transact_time,
+      update_time: response.transact_time,
+      is_working: true
+    }
   end
 end
