@@ -82,7 +82,7 @@ defmodule BinanceMock do
   end
 
   defp subscribe_to_topic(symbol, subscriptions) do
-    symbol = String.upcase(symbol)
+    symbol = String.downcase(symbol)
     stream_name = "trade_events:#{symbol}"
 
     case Enum.member?(subscriptions, symbol) do

@@ -41,7 +41,7 @@ defmodule Naive.Trader do
   end
 
   def init(%State{symbol: symbol} = state) do
-    symbol = String.downcase(symbol)
+    symbol = String.upcase(symbol)
 
     Logger.info("Initializing new trader for symbol(#{symbol})")
 
@@ -106,7 +106,7 @@ defmodule Naive.Trader do
           }
         } = state
       ) do
-    {:no_reply, state}
+    {:noreply, state}
   end
 
   def handle_info(
