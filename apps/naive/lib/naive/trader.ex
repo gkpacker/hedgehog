@@ -240,7 +240,7 @@ defmodule Naive.Trader do
     rebuy_price =
       D.sub(
         buy_price,
-        D.mult(buy_price, float_to_decimal(rebuy_interval))
+        D.mult(buy_price, rebuy_interval)
       )
 
     D.cmp(current_price, rebuy_price) == :lt
@@ -248,9 +248,11 @@ defmodule Naive.Trader do
 
   defp calculate_buy_price(price, buy_down_interval, tick_size) do
     current_price = float_to_decimal(price)
-    interval = float_to_decimal(buy_down_interval)
     tick = float_to_decimal(tick_size)
-    exact_buy_price = D.sub(current_price, D.mult(current_price, interval))
+    exact_buy_price = D.sub(
+      current_price,
+      D.mult(current_price, buy_down_interval)
+    )
 
     exact_buy_price
     |> D.div_int(tick)
@@ -279,12 +281,10 @@ defmodule Naive.Trader do
     original_price = buy_price |> D.new() |> D.mult(fee)
     tick = D.new(tick_size)
 
-    profit_interval_decimal = D.from_float(profit_interval)
-
     new_target_price =
       D.mult(
         original_price,
-        D.add("1.0", profit_interval_decimal)
+        D.add("1.0", profit_interval)
       )
 
     gross_target_price =

@@ -2,6 +2,8 @@ defmodule Naive.Leader do
   use GenServer
 
   alias Decimal, as: D
+  alias Naive.Repo
+  alias Naive.Schema.Settings
   alias Naive.Trader
 
   require Logger
@@ -159,7 +161,7 @@ defmodule Naive.Leader do
       buy_down_interval: settings.buy_down_interval,
       profit_interval: settings.profit_interval,
       rebuy_interval: settings.rebuy_interval,
-      rebuy_notified: settings.rebuy_notified,
+      rebuy_notified: false,
       tick_size: settings.tick_size,
       step_size: settings.step_size
     }
@@ -180,19 +182,11 @@ defmodule Naive.Leader do
   defp fetch_symbol_settings(symbol) do
     symbol_filters = fetch_symbol_filters(symbol)
 
+    settings = Repo.get_by(Settings, symbol: symbol)
+
     Map.merge(
-      %{
-        chunks: 4,
-        budget: 20,
-        # 0.5%
-        buy_down_interval: 0.005,
-        # -0.12% for quick testing
-        profit_interval: -0.0012,
-        # 0.5%
-        rebuy_interval: 0.005,
-        rebuy_notified: false
-      },
-      symbol_filters
+      symbol_filters,
+      settings
     )
   end
 
