@@ -27,7 +27,7 @@ defmodule Streamer.Binance do
 
   def handle_frame({_type, msg}, state) do
     case Jason.decode(msg) do
-      {:ok, event} -> process_event(event)
+      {:ok, event} -> process_event(event, state.symbol)
       {:error, _} -> Logger.error("Unable to parse msg: #{msg}")
     end
 
@@ -37,7 +37,7 @@ defmodule Streamer.Binance do
   @doc """
   https://github.com/binance/binance-spot-api-docs/blob/master/web-socket-streams.md#trade-streams
   """
-  def process_event(%{"e" => "trade"} = event) do
+  def process_event(%{"e" => "trade"} = event, symbol) do
     trade_event = %Streamer.Binance.TradeEvent{
       event_type: event["e"],
       event_time: event["E"],
@@ -58,7 +58,7 @@ defmodule Streamer.Binance do
 
     Phoenix.PubSub.broadcast(
       Streamer.PubSub,
-      "trade_events:#{trade_event.symbol}",
+      "trade_events:#{symbol}",
       trade_event
     )
   end

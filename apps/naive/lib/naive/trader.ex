@@ -41,7 +41,7 @@ defmodule Naive.Trader do
   end
 
   def init(%State{symbol: symbol} = state) do
-    symbol = String.upcase(symbol)
+    symbol = String.downcase(symbol)
 
     Logger.info("Initializing new trader for symbol(#{symbol})")
 
@@ -99,11 +99,10 @@ defmodule Naive.Trader do
   end
 
   def handle_info(
-        %TradeEvent{},
+        %TradeEvent{buyer_order_id: order_id},
         %State{
-          symbol: _symbol,
           buy_order: %Binance.OrderResponse{
-            order_id: _order_id,
+            order_id: order_id,
             status: "FILLED"
           }
         } = state
@@ -197,7 +196,7 @@ defmodule Naive.Trader do
     if sell_order.status == "FILLED" do
       Logger.info("Trader(#{id}) - Trade finished, trader will now exit")
 
-      {:stop, :trade_finished, state}
+      {:stop, :normal, state}
     else
       new_state = %{state | sell_order: sell_order}
 
@@ -206,7 +205,7 @@ defmodule Naive.Trader do
   end
 
   def handle_info(
-        %TradeEvent{price: current_price} = event,
+        %TradeEvent{price: current_price} = _event,
         %State{
           id: id,
           symbol: symbol,
@@ -301,7 +300,7 @@ defmodule Naive.Trader do
   end
 
   defp float_to_decimal(float) when is_binary(float) do
-    float |> String.to_float |> D.from_float()
+    float |> String.to_float() |> D.from_float()
   end
 
   defp float_to_decimal(float) do

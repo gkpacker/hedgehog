@@ -87,7 +87,7 @@ defmodule BinanceMock do
 
     case Enum.member?(subscriptions, symbol) do
       false ->
-        Logger.debug("BinanceMock subscribing to #{stream_name}")
+        Logger.info("BinanceMock subscribing to #{stream_name}")
         Phoenix.PubSub.subscribe(Streamer.PubSub, stream_name)
         [symbol | subscriptions]
 
@@ -105,6 +105,7 @@ defmodule BinanceMock do
         _from,
         %State{order_books: order_books} = state
       ) do
+    symbol = String.upcase(symbol)
     order_book = Map.get(order_books, :"#{symbol}", %OrderBook{})
 
     order =
