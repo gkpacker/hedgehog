@@ -11,7 +11,8 @@ defmodule Naive.Application do
       {
         DynamicSupervisor,
         strategy: :one_for_one, name: Naive.DynamicSymbolSupervisor
-      }
+      },
+      {Naive.Repo, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
