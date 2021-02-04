@@ -1,8 +1,6 @@
 defmodule Naive.SymbolSupervisor do
   use Supervisor
 
-  require Logger
-
   def start_link(symbol) do
     Supervisor.start_link(
       __MODULE__,
@@ -12,8 +10,6 @@ defmodule Naive.SymbolSupervisor do
   end
 
   def init(symbol) do
-    Logger.info("Starting new supervision tree to trade on #{symbol}")
-
     Supervisor.init(
       [
         {
