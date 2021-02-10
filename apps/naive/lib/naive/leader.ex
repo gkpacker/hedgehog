@@ -98,7 +98,11 @@ defmodule Naive.Leader do
         traders =
           case {settings.status, settings.chunks == length(traders)} do
             {"shutdown", _} ->
-              Logger.info("The leader is not allowed to start a new trader as in the shutdown process for #{settings.symbol}")
+              Logger.info(
+                "The leader is not allowed to start a new trader as in the shutdown process for #{
+                  settings.symbol
+                }"
+              )
 
               traders
 
@@ -116,7 +120,7 @@ defmodule Naive.Leader do
                 |> start_new_trader
 
               [new_trader | traders]
-            end
+          end
 
         old_trader_data = Enum.at(traders, index)
         new_trader_data = %{old_trader_data | state: new_trader_state}
@@ -143,7 +147,7 @@ defmodule Naive.Leader do
         Logger.warn("Tried to remove finished trader that leader is not aware of")
 
         if traders == [] do
-          Naive.Server.stop_trading(state.symnol)
+          Naive.stop_trading(state.symnol)
         end
 
         {:noreply, state}
@@ -153,13 +157,15 @@ defmodule Naive.Leader do
         {:noreply, state}
 
       {index, "shutdown"} ->
-        Logger.info("The leader won't start a new trader as trading is shutting down for #{state.symbol}")
+        Logger.info(
+          "The leader won't start a new trader as trading is shutting down for #{state.symbol}"
+        )
 
         new_traders = List.delete_at(traders, index)
 
         if new_traders == [] do
           Logger.info("Shutdown finished for #{state.symbol} - killing the supervision tree")
-          Naive.Server.stop_trading(state.symbol)
+          Naive.stop_trading(state.symbol)
         end
 
         {:noreply, %{state | traders: new_traders}}

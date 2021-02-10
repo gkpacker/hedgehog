@@ -1,5 +1,8 @@
 defmodule Naive do
-  def start_trading(symbol) do
-    Naive.Server.start_trading(symbol)
-  end
+
+  alias Naive.DynamicSymbolSupervisor
+
+  defdelegate start_trading(symbol), to: DynamicSymbolSupervisor
+  defdelegate stop_trading(symbol), to: DynamicSymbolSupervisor
+  defdelegate shutdown_trading(symbol), to: DynamicSymbolSupervisor
 end

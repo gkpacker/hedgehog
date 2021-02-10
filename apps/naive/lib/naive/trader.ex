@@ -249,10 +249,12 @@ defmodule Naive.Trader do
   defp calculate_buy_price(price, buy_down_interval, tick_size) do
     current_price = float_to_decimal(price)
     tick = float_to_decimal(tick_size)
-    exact_buy_price = D.sub(
-      current_price,
-      D.mult(current_price, buy_down_interval)
-    )
+
+    exact_buy_price =
+      D.sub(
+        current_price,
+        D.mult(current_price, buy_down_interval)
+      )
 
     exact_buy_price
     |> D.div_int(tick)
