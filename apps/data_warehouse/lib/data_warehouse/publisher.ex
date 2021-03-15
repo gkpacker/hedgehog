@@ -65,6 +65,11 @@ defmodule DataWarehouse.Publisher do
 
     symbol = String.downcase(trade_event.symbol)
 
+    Logger.debug(
+      "Trade event published " <>
+        "#{trade_event.symbol}@#{trade_event.price}"
+    )
+
     Phoenix.PubSub.broadcast(
       Streamer.PubSub,
       "trade_events:#{symbol}",
