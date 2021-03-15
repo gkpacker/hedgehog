@@ -32,11 +32,11 @@ config :naive,
   ecto_repos: [Naive.Repo],
   trading: %{
     defaults: %{
-      chunks: 5,
-      budget: 1000.0,
-      buy_down_interval: 0.0001,
-      profit_interval: -0.0012,
-      rebuy_interval: 0.001
+      chunks: 2,
+      budget: 20_000.0, # 200 dolares
+      buy_down_interval: 0.0005,
+      profit_interval:  0.0012,
+      rebuy_interval: 0.005
     }
   }
 
