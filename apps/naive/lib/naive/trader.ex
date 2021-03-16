@@ -1,4 +1,6 @@
 defmodule Naive.Trader do
+  @moduledoc "Perform trading operations such as buying, selling and rebuying automatically"
+
   use GenServer, restart: :temporary
 
   require Logger
@@ -6,9 +8,11 @@ defmodule Naive.Trader do
   alias Decimal, as: D
   alias Streamer.Binance.TradeEvent
 
-  @binance_client Application.get_env(:naive, :binance_client)
+  @binance_client Application.compile_env(:naive, :binance_client)
 
   defmodule State do
+    @moduledoc false
+
     @enforce_keys [
       :id,
       :symbol,
@@ -322,7 +326,7 @@ defmodule Naive.Trader do
       Streamer.PubSub,
       "orders:#{symbol}",
       order
-    ) 
+    )
   end
 
   defp convert_to_order(%Binance.OrderResponse{} = response) do

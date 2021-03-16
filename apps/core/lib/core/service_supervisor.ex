@@ -9,7 +9,7 @@ defmodule Core.ServiceSupervisor do
     quote location: :keep do
       use DynamicSupervisor
 
-      def autostart_workers() do
+      def autostart_workers do
         Core.ServiceSupervisor.autostart_workers(
           unquote(settings_repo),
           unquote(module),

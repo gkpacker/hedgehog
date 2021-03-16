@@ -1,4 +1,6 @@
 defmodule Streamer.Settings do
+  @moduledoc "Provides a clear interface for operating over Streamer.Schema.Settings"
+
   alias Streamer.{Repo, Schema}
 
   import Ecto.Query, only: [from: 2]

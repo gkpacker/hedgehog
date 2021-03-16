@@ -1,4 +1,8 @@
 defmodule Naive.Leader do
+  @moduledoc """
+  Stores active Traders and their latest known state to restart them if something goes wrong.
+  """
+
   use GenServer
 
   alias Decimal, as: D
@@ -8,15 +12,19 @@ defmodule Naive.Leader do
 
   require Logger
 
-  @binance_client Application.get_env(:naive, :binance_client)
+  @binance_client Application.compile_env(:naive, :binance_client)
 
   defmodule State do
+    @moduledoc false
+
     defstruct symbol: nil,
               settings: nil,
               traders: []
   end
 
   defmodule TraderData do
+    @moduledoc "Tracks a Trader process"
+
     defstruct pid: nil, ref: nil, state: nil
   end
 

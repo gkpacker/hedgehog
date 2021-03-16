@@ -30,13 +30,13 @@ defmodule DataWarehouse.Subscribers.Server do
     key = "#{stream_name}:#{symbol}"
 
     workers =
-      if !Map.has_key?(state.workers, key) do
+      if Map.has_key?(state.workers, key) do
+        Logger.info("Worker already started for #{key} data")
+        state.workers
+      else
         Logger.info("Starting new worker to store #{key} data")
         result = start_worker(stream_name, symbol)
         Map.put(state.workers, key, result)
-      else
-        Logger.info("Worker already started for #{key} data")
-        state.workers
       end
 
     {:noreply, %{state | workers: workers}}

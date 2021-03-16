@@ -1,5 +1,4 @@
 defmodule DataWarehouse.Publisher do
-  # DataWarehouse.Publisher.start_link(%{  type: :trade_events,  symbol: "XRPUSDT",  from: "2019-06-02",  to: "2019-06-04",  interval: 5})
   use Task
 
   import Ecto.Query, only: [from: 2]
@@ -40,20 +39,20 @@ defmodule DataWarehouse.Publisher do
         )
         |> Repo.stream()
         |> Enum.with_index()
-        |> Enum.map(fn {row, index} ->
-          :timer.sleep(interval)
-
-          if rem(index, 10_000) == 0 do
-            Logger.info("Publisher broadcasted #{index} events")
-          end
-
-          publish_trade_event(row)
-        end)
+        |> Enum.map(&handle_event_publishing/1)
       end,
       timeout: :infinity
     )
 
     Logger.info("Publisher finished streaming trade events")
+  end
+
+  defp handle_event_publishing({row, index}) do
+    :timer.sleep(interval)
+
+    if rem(index, 10_000) == 0, do: Logger.info("Publisher broadcasted #{index} events")
+
+    publish_trade_event(row)
   end
 
   defp publish_trade_event(%DataWarehouse.TradeEvent{} = trade_event) do

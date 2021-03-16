@@ -1,4 +1,6 @@
 defmodule BinanceMock do
+  @moduledoc "Mocks Binance behaviour for easy testing"
+
   use GenServer
 
   alias Decimal, as: D
@@ -6,10 +8,14 @@ defmodule BinanceMock do
   require Logger
 
   defmodule State do
+    @moduledoc false
+
     defstruct order_books: %{}, subscriptions: [], fake_order_id: 1
   end
 
   defmodule OrderBook do
+    @moduledoc "Store placed orders"
+
     defstruct buy_side: [], sell_side: [], historical: []
   end
 
@@ -21,9 +27,7 @@ defmodule BinanceMock do
     {:ok, %State{}}
   end
 
-  def get_exchange_info() do
-    Binance.get_exchange_info()
-  end
+  def get_exchange_info, do: Binance.get_exchange_info()
 
   def order_limit_buy(symbol, quantity, price, "GTC") do
     order_limit(symbol, quantity, price, "BUY")
@@ -144,7 +148,7 @@ defmodule BinanceMock do
 
     (filled_buy_orders ++ filled_sell_orders)
     |> Enum.map(&convert_order_to_event(&1, trade_event.event_time))
-    |> Enum.map(&broadcast_trade_event/1)
+    |> Enum.each(&broadcast_trade_event/1)
 
     remaining_buy_orders = Enum.drop(order_book.buy_side, length(filled_buy_orders))
 
