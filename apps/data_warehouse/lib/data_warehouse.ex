@@ -1,6 +1,24 @@
 defmodule DataWarehouse do
   import Ecto.Query
 
+  alias DataWarehouse.Subscriber.DynamicSupervisor
+
+  def start_storing(stream, symbol) do
+    stream
+    |> build_topic(symbol)
+    |> DynamicSupervisor.start_worker()
+  end
+
+  def stop_storing(stream, symbol) do
+    stream
+    |> build_topic(symbol)
+    |> DynamicSupervisor.stop_worker()
+  end
+
+  defp build_topic(stream, symbol) do
+    "#{String.downcase(stream)}:#{String.upcase(symbol)}"
+  end
+
   # TODO: move to a calculation dedicated module
   def estimate_profits_since_minutes_ago(symbol, minutes_ago) do
     seconds_ago = -minutes_ago * 60
