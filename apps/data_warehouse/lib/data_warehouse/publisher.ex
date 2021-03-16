@@ -39,7 +39,7 @@ defmodule DataWarehouse.Publisher do
         )
         |> Repo.stream()
         |> Enum.with_index()
-        |> Enum.map(&handle_event_publishing/1)
+        |> Enum.map(&handle_event_publishing(&1, interval))
       end,
       timeout: :infinity
     )
@@ -47,7 +47,7 @@ defmodule DataWarehouse.Publisher do
     Logger.info("Publisher finished streaming trade events")
   end
 
-  defp handle_event_publishing({row, index}) do
+  defp handle_event_publishing({row, index}, interval) do
     :timer.sleep(interval)
 
     if rem(index, 10_000) == 0, do: Logger.info("Publisher broadcasted #{index} events")
