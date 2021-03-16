@@ -85,6 +85,8 @@ defmodule Core.ServiceSupervisor do
   end
 
   def get_pid(worker_module, symbol) do
+    symbol = String.upcase(symbol)
+
     Process.whereis(:"#{worker_module}-#{symbol}")
   end
 end

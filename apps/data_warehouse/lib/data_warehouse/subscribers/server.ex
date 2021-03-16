@@ -25,8 +25,8 @@ defmodule DataWarehouse.Subscribers.Server do
   end
 
   def handle_cast({:start_storing, stream_name, symbol}, state) do
-    stream_name = String.downcase(stream_name)
-    symbol = String.downcase(symbol)
+    stream_name = String.upcase(stream_name)
+    symbol = String.upcase(symbol)
     key = "#{stream_name}:#{symbol}"
 
     workers =

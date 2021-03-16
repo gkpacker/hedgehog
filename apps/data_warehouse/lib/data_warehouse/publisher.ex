@@ -63,7 +63,7 @@ defmodule DataWarehouse.Publisher do
         Map.to_list(trade_event)
       )
 
-    symbol = String.downcase(trade_event.symbol)
+    symbol = String.upcase(trade_event.symbol)
 
     Logger.debug(
       "Trade event published " <>

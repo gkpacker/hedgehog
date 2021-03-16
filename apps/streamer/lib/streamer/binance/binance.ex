@@ -11,8 +11,9 @@ defmodule Streamer.Binance do
   end
 
   def start_link(symbol) do
-    symbol = String.downcase(symbol)
     url = "#{@stream_endpoint}#{symbol}@trade"
+
+    symbol = String.upcase(symbol)
 
     Logger.info("Starting streaming on #{symbol}")
     Logger.debug(url)

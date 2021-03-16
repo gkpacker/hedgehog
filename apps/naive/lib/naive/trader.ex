@@ -41,7 +41,7 @@ defmodule Naive.Trader do
   end
 
   def init(%State{symbol: symbol} = state) do
-    symbol = String.downcase(symbol)
+    symbol = String.upcase(symbol)
 
     Logger.info("Initializing new trader for symbol(#{symbol})")
 
