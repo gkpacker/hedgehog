@@ -35,7 +35,7 @@ defmodule DataWarehouse.Subscriber.Worker do
       |> Map.to_list()
       |> Keyword.delete(:__struct__)
 
-    DataWarehouse.TradeEvent
+    DataWarehouse.Schema.TradeEvent
     |> struct!(opts)
     |> DataWarehouse.Repo.insert!()
 
@@ -43,7 +43,7 @@ defmodule DataWarehouse.Subscriber.Worker do
   end
 
   def handle_info(%Binance.Order{} = order, topic) do
-    converted_order = %DataWarehouse.Order{
+    converted_order = %DataWarehouse.Schema.Order{
       symbol: order.symbol,
       order_id: order.order_id,
       client_order_id: order.client_order_id,

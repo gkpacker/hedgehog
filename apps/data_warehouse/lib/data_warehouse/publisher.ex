@@ -29,7 +29,7 @@ defmodule DataWarehouse.Publisher do
 
     Repo.transaction(
       fn ->
-        (te in DataWarehouse.TradeEvent)
+        (te in DataWarehouse.Schema.TradeEvent)
         |> from(
           where:
             te.symbol == ^symbol and
@@ -55,7 +55,7 @@ defmodule DataWarehouse.Publisher do
     publish_trade_event(row)
   end
 
-  defp publish_trade_event(%DataWarehouse.TradeEvent{} = trade_event) do
+  defp publish_trade_event(%DataWarehouse.Schema.TradeEvent{} = trade_event) do
     new_trade_event =
       struct(
         Streamer.Binance.TradeEvent,

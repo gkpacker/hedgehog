@@ -26,10 +26,8 @@ defmodule DataWarehouse do
     symbol = String.upcase(symbol)
 
     orders =
-      o in DataWarehouse.Order
-      |> from(
-        where: o.inserted_at >= ^from_date and o.symbol == ^symbol
-      )
+      (o in DataWarehouse.Schema.Order)
+      |> from(where: o.inserted_at >= ^from_date and o.symbol == ^symbol)
       |> DataWarehouse.Repo.all()
 
     total_sold = sum_orders(orders, "SELL")
