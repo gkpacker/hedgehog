@@ -1,12 +1,12 @@
 defmodule Naive.DynamicSymbolSupervisor do
   use Core.ServiceSupervisor,
-    settings_repo: Naive.SettingsRepository,
+    settings_repo: Naive.Settings,
     module: __MODULE__,
     worker_module: Naive.SymbolSupervisor
 
   require Logger
 
-  alias Naive.SettingsRepository
+  alias Naive.Settings
 
   def start_link(init_arg) do
     Core.ServiceSupervisor.start_link(
@@ -28,11 +28,11 @@ defmodule Naive.DynamicSymbolSupervisor do
     case get_pid(symbol) do
       nil ->
         Logger.warn("#{Naive.SymbolSupervisor} worker for #{symbol} already stopped")
-        {:ok, _settings} = SettingsRepository.stop(symbol)
+        {:ok, _settings} = Settings.stop(symbol)
 
       _pid ->
         Logger.warn("Initializing shutdown of #{Naive.SymbolSupervisor} worker for #{symbol}")
-        {:ok, settings} = SettingsRepository.shutdown(symbol)
+        {:ok, settings} = Settings.shutdown(symbol)
         notifier().notify(:settings_updated, settings)
         {:ok, settings}
     end

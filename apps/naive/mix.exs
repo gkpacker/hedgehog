@@ -18,9 +18,7 @@ defmodule Naive.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      application: [:binance, :phoenix_pubsub],
-      extra_applications: [:logger],
-      # applications: [:binance],
+      extra_applications: [:binance, :phoenix_pubsub, :logger],
       mod: {Naive.Application, []}
     ]
   end

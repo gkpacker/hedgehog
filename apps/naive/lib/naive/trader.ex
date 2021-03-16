@@ -316,13 +316,13 @@ defmodule Naive.Trader do
   end
 
   defp broadcast_order(%Binance.Order{} = order) do
-    symbol = String.downcase(order.symbol)
+    symbol = String.upcase(order.symbol)
 
     Phoenix.PubSub.broadcast(
       Streamer.PubSub,
       "orders:#{symbol}",
       order
-    )
+    ) 
   end
 
   defp convert_to_order(%Binance.OrderResponse{} = response) do

@@ -1,4 +1,4 @@
-defmodule Naive.SettingsRepository do
+defmodule Naive.Settings do
   alias Naive.{Repo, Schema}
 
   import Ecto.Query, only: [from: 2]
