@@ -9,6 +9,15 @@
 # move said applications out of the umbrella.
 import Config
 
+config :streamer,
+  ecto_repos: [Streamer.Repo]
+
+config :streamer, Streamer.Repo,
+  database: "streamer",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost"
+
 config :naive, Naive.Repo,
   database: "naive",
   username: "postgres",
