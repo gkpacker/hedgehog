@@ -6,12 +6,14 @@ defmodule Streamer.Binance do
   @stream_endpoint "wss://stream.binance.com:9443/ws/"
 
   defmodule State do
+    @moduledoc false
+
     @enforce_keys [:symbol]
     defstruct [:symbol]
   end
 
   def start_link(symbol) do
-    url = "#{@stream_endpoint}#{symbol}@trade"
+    url = "#{@stream_endpoint}#{String.downcase(symbol)}@trade"
 
     symbol = String.upcase(symbol)
 

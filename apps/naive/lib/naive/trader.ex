@@ -58,7 +58,7 @@ defmodule Naive.Trader do
   end
 
   def handle_info(
-        %TradeEvent{price: price},
+        %TradeEvent{symbol: symbol, price: price},
         %State{
           id: id,
           symbol: symbol,
